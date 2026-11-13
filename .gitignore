@@ -1,0 +1,6 @@
+.env
+.aluno.env
+progresso.local.md
+progresso.pending.json
+__pycache__/
+.venv/
