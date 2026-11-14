@@ -30,11 +30,27 @@ Este documento consolida as obras e documentações oficiais utilizadas nas aula
 3. **Ramírez, Sebastián.** *FastAPI Documentation — Tutorial / User Guide*.
    - **URL Oficial:** [https://fastapi.tiangolo.com/tutorial/](https://fastapi.tiangolo.com/tutorial/) — Aula 05.
 
+4. **Snowflake / Streamlit.** *Streamlit Documentation — Get Started & Development Concepts*.
+   - **URLs Oficiais:**
+     - [https://docs.streamlit.io/get-started](https://docs.streamlit.io/get-started) — Aula 06.
+     - [https://docs.streamlit.io/develop/concepts](https://docs.streamlit.io/develop/concepts) — Aula 06.
+
+5. **Chacon, Scott; Straub, Ben.** *Pro Git*. 2ª Edição. Apress, 2014 (edição atualizada).
+   - **Capítulos cobertos nas aulas:**
+     - Capítulo 1: *Getting Started* (pp. 10–25) — Aula 07.
+     - Capítulo 2: *Git Basics* (pp. 26–62) — Aula 07.
+     - Capítulo 3: *Git Branching* (pp. 63–104) — Aula 07.
+     - Capítulo 5: *Distributed Git* (pp. 126–165) — Aula 07.
+     - Capítulo 6: *GitHub* (pp. 166–217) — Aula 07.
+
+6. **GitHub.** *GitHub Docs — Collaborating with Pull Requests*.
+   - **URL Oficial:** [https://docs.github.com/en/pull-requests/collaborating-with-pull-requests](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests) — Aula 07.
+
 ---
 
 ## 2. Capítulos Avançados para Consulta Sob Demanda
 
-Os tópicos abaixo não exigem estudo prévio obrigatório para iniciar os projetos da Diretoria, mas devem ser consultados quando um projeto demandar otimização de baixo nível, concorrência ou arquitetura de bibliotecas:
+Os tópicos abaixo não exigem estudo prévio obrigatório para iniciar os projetos da Diretoria, mas devem ser consultados quando um projeto demandar otimização de baixo nível, concorrência, depuração avançada de histórico ou arquitetura de bibliotecas:
 
 - **Em *Python for Data Analysis* (Wes McKinney):**
   - **Capítulo 13 (*Data Analysis Examples*, pp. 425–472):** Estudos de caso completos integrando limpeza, agregação e séries temporais em bases reais (Bitly, MovieLens, USDA e FEC).
@@ -47,3 +63,9 @@ Os tópicos abaixo não exigem estudo prévio obrigatório para iniciar os proje
   - **Parte III (*Classes and Protocols*, Capítulos 11 a 16, pp. 363–588):** Protocolos estáticos (`typing.Protocol`), herança, mixins e sobrecarga de operadores.
   - **Parte IV (*Control Flow*, Capítulos 17 a 21, pp. 589–830):** Implementação de iteradores customizados, geradores avançados, gerenciadores de contexto (`with` / `@contextmanager`) e programação concorrente com `concurrent.futures` (threads/processos) e `asyncio`.
   - **Parte V (*Metaprogramming*, Capítulos 22 a 24, pp. 831–988):** Atributos dinâmicos, descritores (`__get__`, `__set__`) e metaclasses (útil apenas na construção de frameworks ou ORMs internos).
+
+- **Em *Pro Git* (Scott Chacon & Ben Straub):**
+  - **Capítulo 4 (*Git on the Server*, pp. 105–125):** Protocolos de transferência (SSH, Smart HTTP), geração de chaves e hospedagem própria.
+  - **Capítulo 7 (*Git Tools*, pp. 218–335):** Seleção avançada de revisões, *interactive staging* (`git add -p`), *stashing*, assinatura GPG, busca binária de regressões (`git bisect`), `rerere` e submódulos.
+  - **Capítulo 8 (*Customizing Git*, pp. 336–366):** Atributos Git (`.gitattributes`) e *Git Hooks* (`pre-commit`, `pre-receive`) para validação automatizada.
+  - **Capítulo 10 (*Git Internals*, pp. 414–452):** Objetos internos (*blobs*, *trees*, *commits*), *packfiles*, *refspec* e recuperação de dados perdidos com `git reflog`.

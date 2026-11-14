@@ -12,6 +12,8 @@
 - `03-ingestao-limpeza-e-transformacao-tabular.md` — Ingestão (CSV, JSON, Parquet), tratamento de `NA`, deduplicação, strings e junções (`merge`, `concat`, `melt`).
 - `04-agregacoes-groupby-e-series-temporais.md` — `split-apply-combine` (`agg`, `transform`), `DatetimeIndex`, `resample` e janelas móveis (`rolling`).
 - `05-integracao-de-dados-via-apis-e-fastapi.md` — Consumo resiliente de APIs HTTP (`httpx`), validação de esquemas com Pydantic e serviços de dados em FastAPI.
+- `06-aplicacoes-interativas-de-dados-com-streamlit.md` — Modelo de execução *top-to-bottom*, cache de dados e recursos (`@st.cache_data`, `@st.cache_resource`), estado de sessão (`st.session_state`), formulários (`st.form`), fragmentos (`@st.fragment`), apps multipágina e gestão de segredos (`st.secrets`).
+- `07-controle-de-versao-e-colaboracao-com-git-e-github.md` — Modelo de snapshots e três áreas do Git, `.gitignore`, branching, resolução de conflitos de merge, sincronização com remotos (`fetch`, `merge`, `push`) e fluxo de Pull Requests e revisões no GitHub.
 - `referencias.md` — Bibliografia consolidada e capítulos avançados de consulta.
 
 ### 02. Engenharia de Software Assistida por IA (`02-engenharia-de-software-assistida-por-ia/`) — **[ATIVA]**
@@ -65,5 +67,5 @@
 
 ---
 
-## Status da Grade Inicial
-- **Conclusão das 7 Trilhas da Grade Inicial:** Todas as **7 trilhas curriculares** (`01` a `07`) encontram-se **`[ATIVAS]`** e integralmente geradas, totalizando **30 aulas técnicas** sequenciais auditadas e todas as **25 fontes** do acervo convertidas.
+## Status da Grade
+- **Conclusão das 7 Trilhas da Grade:** Todas as **7 trilhas curriculares** (`01` a `07`) encontram-se **`[ATIVAS]`** e integralmente geradas, totalizando **32 aulas técnicas** sequenciais auditadas e todas as **29 fontes** do acervo convertidas.
