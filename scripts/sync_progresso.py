@@ -9,30 +9,35 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Tuple
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
-ENV_PATH = ROOT_DIR / ".aluno.env"
-PROGRESSO_PATH = ROOT_DIR / "progresso.local.md"
+SCRIPTS_DIR = Path(__file__).resolve().parent
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+from identificar_aluno import (  # noqa: E402
+    PROGRESSO_PATH,
+    ROOT_DIR,
+    USER_AGENT,
+    ErroAutenticacao,
+    ErroConexao,
+    carregar_env,
+    extrair_erro_http,
+    extrair_token_valido,
+    identificar_aluno,
+    ler_cache_identidade,
+    resolver_urls_api,
+    salvar_cache_identidade,
+)
+
 PENDING_PATH = ROOT_DIR / "progresso.pending.json"
-PUB_KEY_PATH = ROOT_DIR / "scripts" / "public_key.pem"
-
-
-def carregar_env() -> dict:
-    if not ENV_PATH.exists():
-        print("[ERRO] Arquivo .aluno.env não encontrado na raiz.")
-        sys.exit(1)
-    env = {}
-    for line in ENV_PATH.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        k, v = line.split("=", 1)
-        env[k.strip()] = v.strip().strip('"').strip("'")
-    return env
+PUB_KEY_PATH = SCRIPTS_DIR / "public_key.pem"
 
 
 def extrair_aulas_concluidas(md_text: str) -> list:
-    return sorted(set(re.findall(r"`?([0-9]{2}-[^/`\s]+/[0-9]{2}-[^`\s]+\.md)`?", md_text)))
+    return sorted(
+        set(re.findall(r"`?([0-9]{2}-[^/`\s]+/[0-9]{2}-[^`\s]+\.md)`?", md_text))
+    )
 
 
 def cifrar_conteudo(texto: str) -> dict:
@@ -70,66 +75,128 @@ def cifrar_conteudo(texto: str) -> dict:
     }
 
 
-def main():
-    env = carregar_env()
-    aluno_id = env.get("ALUNO_ID", "")
-    aluno_token = env.get("ALUNO_TOKEN", "")
-    api_url = env.get("PROFESSOR_API_URL", "").rstrip("/")
-    if api_url and not api_url.endswith("/api/progresso"):
-        api_url = f"{api_url}/api/progresso"
+def resolver_identidade_para_sync(env: dict, aluno_token: str) -> Tuple[str, str]:
+    cache = ler_cache_identidade(aluno_token)
+    if cache:
+        return str(cache["aluno_id"]), str(cache["nome"])
 
-    if not aluno_id or not aluno_token or "substitua" in aluno_token:
-        print("[ERRO] ALUNO_ID ou ALUNO_TOKEN inválidos em .aluno.env.")
+    try:
+        identidade = identificar_aluno(env, permitir_cache_offline=True)
+        return str(identidade["aluno_id"]), str(identidade["nome"])
+    except ErroConexao:
+        return "", ""
+
+
+def main():
+    try:
+        env = carregar_env()
+    except FileNotFoundError:
+        print("[ERRO] Arquivo .aluno.env não encontrado na raiz.")
         sys.exit(1)
 
-    if not PROGRESSO_PATH.exists():
+    aluno_token = extrair_token_valido(env)
+    if not aluno_token:
+        print("[ERRO] ALUNO_TOKEN inválido ou ausente em .aluno.env.")
+        sys.exit(1)
+
+    try:
+        aluno_id, aluno_nome = resolver_identidade_para_sync(env, aluno_token)
+    except ErroAutenticacao as exc:
+        print(f"[ERRO] {exc}")
+        sys.exit(1)
+
+    _, api_url = resolver_urls_api(env.get("PROFESSOR_API_URL", ""))
+
+    if PROGRESSO_PATH.exists():
+        conteudo_md = PROGRESSO_PATH.read_text(encoding="utf-8")
+        aulas_concluidas = extrair_aulas_concluidas(conteudo_md)
+        timestamp = datetime.now(timezone.utc).isoformat()
+
+        payload = {
+            "aluno_id": aluno_id or "pendente_resolucao_por_token",
+            "aluno_nome": aluno_nome or aluno_id or "Aluno",
+            "timestamp_utc": timestamp,
+            "total_aulas_concluidas": len(aulas_concluidas),
+            "aulas_concluidas": aulas_concluidas,
+            "relatorio_criptografado": cifrar_conteudo(conteudo_md),
+        }
+        body_bytes = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        total_aulas = len(aulas_concluidas)
+    elif PENDING_PATH.exists():
+        body_bytes = PENDING_PATH.read_bytes()
+        try:
+            pending_data = json.loads(body_bytes.decode("utf-8"))
+            total_aulas = int(pending_data.get("total_aulas_concluidas") or 0)
+        except Exception:
+            total_aulas = 0
+    else:
         print("[ERRO] Arquivo progresso.local.md não encontrado.")
         sys.exit(1)
 
-    conteudo_md = PROGRESSO_PATH.read_text(encoding="utf-8")
-    aulas_concluidas = extrair_aulas_concluidas(conteudo_md)
-    timestamp = datetime.now(timezone.utc).isoformat()
+    assinatura = hmac.new(
+        aluno_token.encode("utf-8"), body_bytes, hashlib.sha256
+    ).hexdigest()
 
-    payload = {
-        "aluno_id": aluno_id,
-        "aluno_nome": env.get("ALUNO_NOME", aluno_id),
-        "timestamp_utc": timestamp,
-        "total_aulas_concluidas": len(aulas_concluidas),
-        "aulas_concluidas": aulas_concluidas,
-        "relatorio_criptografado": cifrar_conteudo(conteudo_md),
-    }
-
-    body_bytes = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-    assinatura = hmac.new(aluno_token.encode("utf-8"), body_bytes, hashlib.sha256).hexdigest()
-
-    if not api_url or "seu-projeto.vercel.app" in api_url:
+    if not api_url:
         PENDING_PATH.write_bytes(body_bytes)
-        print("[AVISO] PROFESSOR_API_URL ainda não configurada. Relatório salvo localmente em progresso.pending.json.")
+        print(
+            "[AVISO] PROFESSOR_API_URL ainda não configurada. Relatório salvo localmente em progresso.pending.json."
+        )
         sys.exit(0)
+
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "User-Agent": USER_AGENT,
+        "X-Aluno-Signature": assinatura,
+    }
+    if aluno_id:
+        headers["X-Aluno-ID"] = aluno_id
+    else:
+        headers["X-Aluno-Token"] = aluno_token
 
     req = urllib.request.Request(
         api_url,
         data=body_bytes,
         method="POST",
-        headers={
-            "Content-Type": "application/json",
-            "X-Aluno-ID": aluno_id,
-            "X-Aluno-Signature": assinatura,
-        },
+        headers=headers,
     )
 
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
+            resp_raw = resp.read().decode("utf-8", errors="replace").strip()
             if 200 <= resp.status < 300:
                 if PENDING_PATH.exists():
                     PENDING_PATH.unlink()
-                print(f"[OK] Progresso sincronizado com sucesso ({len(aulas_concluidas)} aulas registradas).")
+                if not aluno_id and resp_raw:
+                    try:
+                        resp_json = json.loads(resp_raw)
+                        if resp_json.get("aluno_id") and resp_json.get("nome"):
+                            salvar_cache_identidade(aluno_token, resp_json)
+                    except Exception:
+                        pass
+                print(
+                    f"[OK] Progresso sincronizado com sucesso ({total_aulas} aulas registradas)."
+                )
             else:
                 PENDING_PATH.write_bytes(body_bytes)
-                print(f"[AVISO] Resposta inesperada ({resp.status}). Salvo em progresso.pending.json.")
+                print(
+                    f"[AVISO] Resposta inesperada ({resp.status}). Salvo em progresso.pending.json."
+                )
+    except urllib.error.HTTPError as exc:
+        msg = extrair_erro_http(exc)
+        if exc.code in (400, 401, 403):
+            print(f"[ERRO] Envio rejeitado pelo servidor (HTTP {exc.code}): {msg}")
+            sys.exit(1)
+        PENDING_PATH.write_bytes(body_bytes)
+        print(
+            f"[AVISO] Erro no servidor (HTTP {exc.code}: {msg}). Progresso salvo em progresso.pending.json para reenvio."
+        )
     except urllib.error.URLError as exc:
         PENDING_PATH.write_bytes(body_bytes)
-        print(f"[AVISO] Falha de conexão ({exc.reason}). Progresso salvo em progresso.pending.json para reenvio.")
+        print(
+            f"[AVISO] Falha de conexão ({exc.reason}). Progresso salvo em progresso.pending.json para reenvio."
+        )
 
 
 if __name__ == "__main__":
