@@ -74,7 +74,9 @@ def main():
     env = carregar_env()
     aluno_id = env.get("ALUNO_ID", "")
     aluno_token = env.get("ALUNO_TOKEN", "")
-    api_url = env.get("PROFESSOR_API_URL", "")
+    api_url = env.get("PROFESSOR_API_URL", "").rstrip("/")
+    if api_url and not api_url.endswith("/api/progresso"):
+        api_url = f"{api_url}/api/progresso"
 
     if not aluno_id or not aluno_token or "substitua" in aluno_token:
         print("[ERRO] ALUNO_ID ou ALUNO_TOKEN inválidos em .aluno.env.")
