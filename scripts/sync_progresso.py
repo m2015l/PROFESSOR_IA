@@ -32,7 +32,7 @@ def carregar_env() -> dict:
 
 
 def extrair_aulas_concluidas(md_text: str) -> list:
-    return sorted(set(re.findall(r"`([0-9]{2}-[^/`]+/[0-9]{2}-[^`]+\.md)`", md_text)))
+    return sorted(set(re.findall(r"`?([0-9]{2}-[^/`\s]+/[0-9]{2}-[^`\s]+\.md)`?", md_text)))
 
 
 def cifrar_conteudo(texto: str) -> dict:

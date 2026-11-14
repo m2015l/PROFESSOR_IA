@@ -1,0 +1,32 @@
+# Trilha 06 — LLMs, Prompt Engineering e Avaliação
+
+## Objetivo da Trilha
+
+Capacitar o engenheiro de software e de dados a compreender a arquitetura interna de grandes modelos de linguagem (*Large Language Models* — LLMs), o funcionamento matemático de tokenizadores, *embeddings* contextualizados e mecanismos de atenção, e a projetar, estruturar, orquestrar, avaliar, proteger e otimizar aplicações de produção baseadas em modelos de fundação. A trilha parte da mecânica de pré-treinamento autorregressivo e pós-treinamento (SFT, RLHF e DPO), avança pela engenharia de prompts sistemática e montagem de contexto com orçamento de tokens, cobre extração de saídas estruturadas com restrição gramatical, calibração via `logprobs`, invocação de ferramentas (*Tool Calling*) e *workflows* determinísticos, e conclui com avaliação orientada a métricas (perplexidade, implicação textual, *AI-as-a-Judge* / protocolo SOMA), *finetuning* eficiente em parâmetros (PEFT/LoRA/QLoRA), *guardrails* defensivos e otimização de inferência (KV Cache, *PagedAttention*, *Speculative Decoding*, *Continuous Batching* e *Prompt Caching*).
+
+---
+
+## Pré-requisitos
+
+- **Trilha 01 — Pensamento Computacional e Engenharia de Software:** programação modular em Python, tipagem estática, validação de esquemas (Pydantic/JSON Schema) e testes automatizados.
+- **Trilha 02 — Matemática, Estatística e Probabilidade para IA:** álgebra linear (multiplicação matricial, produto escalar, norma euclidiana, decomposição de posto baixo), teoria da informação (entropia, entropia cruzada, divergência de Kullback-Leibler) e distribuições de probabilidade discretas.
+- **Trilha 05 — Machine Learning e Sistemas em Produção:** métricas de classificação (precisão, revocação, F1-score, calibração), ciclos de avaliação offline/online e requisitos de latência/vazão em serviços de inferência.
+
+---
+
+## Sequência de Aulas
+
+| Ordem | Arquivo | Título da Aula | Escopo Técnico Principal | Fontes Base |
+| :---: | :--- | :--- | :--- | :--- |
+| **01** | `01-fundamentos-de-llms-tokens-e-embeddings.md` | Fundamentos de LLMs, Tokens e Embeddings | Autossupervisão; modelos mascarados (*Encoder-only*) vs. autorregressivos (*Decoder-only*); tokenização BPE, WordPiece e SentencePiece (`tiktoken`); *embeddings* estáticos vs. contextualizados e busca contrastiva (SBERT); atenção multi-cabeça causal, MQA, GQA, RoPE, Pre-RMSNorm, SwiGLU e KV Cache; leis de escala de Chinchilla; ciclo Pré-treinamento $\to$ SFT $\to$ RLHF/DPO; estratégias de decodificação e amostragem (`temperature`, `top_k`, `top_p`, `min_p`). | Huyen (Caps. 1–2); Alammar & Grootendorst (Caps. 1–3); Berryman & Ziegler (Cap. 2); Phoenix & Taylor (Cap. 2); Karpathy (YouTube); OpenAI Cookbook |
+| **02** | `02-principios-de-prompt-engineering-e-estruturacao.md` | Princípios de Prompt Engineering e Estruturação | Cinco princípios de prompting; papéis `system`, `user` e `assistant` (ChatML e *prefill*), *Instruction Hierarchy*; conteúdo estático vs. dinâmico; modularidade, inércia de tokenização (*inertness*) e fragmentos elásticos (*elastic snippets*); seleção gulosa sob orçamento de tokens; delimitadores XML e Markdown; curva de atenção em U (*Lost in the Middle*); *In-Context Learning* (*Zero-Shot* e *Few-Shot*); alocação de computação em tempo de teste: *Chain-of-Thought* (CoT), *Self-Consistency*, *Tree-of-Thought* (ToT), *Least-to-Most*, *Inner Monologue* (`<thinking>`) e *Self-Critique*. | Huyen (Cap. 5); Alammar & Grootendorst (Cap. 6); Berryman & Ziegler (Caps. 1, 3–6, 8); Phoenix & Taylor (Caps. 1, 3); Anthropic Docs |
+| **03** | `03-saidas-estruturadas-tool-calling-e-pipelines-de-llm.md` | Saídas Estruturadas, Tool Calling e Pipelines de LLM | Controle de saída estruturada: condicionamento e *stop sequences*, amostragem restrita por gramática/FSM (*Guided Generation* via JSON Schema/Pydantic/CFG) e validação com retentativa (*Reflexion*); classificação com modelos de representação vs. geradores; inspeção de `logprobs`, unicidade do primeiro token e calibração com *logit bias*; arquitetura interna de *Tool Calling* / *Function Calling* e padrão ReAct; decomposição em *workflows* (Pipelines, DAGs e grafos cíclicos controlados) e padrões de agregação (*Stuff*, *Refine*, *Map-Reduce*, *Map-Rerank*). | Huyen (Caps. 2, 5); Alammar & Grootendorst (Caps. 4–7); Berryman & Ziegler (Caps. 7–9); Phoenix & Taylor (Cap. 3); OpenAI Cookbook |
+| **04** | `04-avaliacao-sistematica-guardrails-e-otimizacao-de-inferencia.md` | Avaliação Sistemática, Guardrails e Otimização de Inferência | *Evaluation-driven development*; entropia cruzada, BPC/BPB e perplexidade; avaliação exata/funcional (`pass@k`), similaridade semântica e consistência factual local via NLI (`DeBERTa`) e SAFE; *AI-as-a-Judge* pontual (protocolo SOMA/RTC) e comparativo (Elo), vieses de autopreferência, posição e verbosidade; suítes offline vs. avaliação online; decisão RAG vs. *Finetuning* e matemática de memória PEFT/LoRA/QLoRA; engenharia de prompts defensiva (*Prompt Extraction*, *Jailbreaking*, *Prompt Injection* direto/indireto) e *Guardrails*; otimização de inferência (*Prefill* vs. *Decode*, TTFT, TPOT, *Goodput*, MFU, MBU, cálculo de KV Cache, quantização, *Speculative Decoding*, *PagedAttention*, *Continuous Batching* e *Prompt Caching*). | Huyen (Caps. 3–5, 7, 9); Berryman & Ziegler (Caps. 7, 10); Alammar & Grootendorst (Caps. 7, 12) |
+
+---
+
+## Como Estudar esta Trilha
+
+1. **Execute os scripts de cada aula localmente:** utilize `tiktoken` e `sentence-transformers` na Aula 01 para inspecionar a fragmentação de tokens e a geometria vetorial; teste o montador de prompts com orçamento de tokens na Aula 02; valide esquemas Pydantic, calibração de `logprobs` e despacho de ferramentas na Aula 03; e calcule o dimensionamento de VRAM/KV Cache e a mitigação de viés de posição na Aula 04.
+2. **Priorize contratos determinísticos e avaliação antes de escalar complexidade:** nunca avance para *workflows* multi-agentes ou *finetuning* sem antes implementar validação estruturada estrita (Aula 03) e uma suíte de avaliação offline automatizada (Aula 04).
+3. **Consulte `referencias.md` para aprofundamentos fora do escopo das aulas:** tópicos especializados como engenharia de conjuntos de dados para treino (*AI Engineering* Cap. 8), treinamento profundo de modelos de *embedding* e ajuste fino supervisionado/preferência passo a passo (*Hands-On LLM* Part III) e modelos de difusão para geração de imagens (*Prompt Engineering for GenAI* Caps. 7–9) estão mapeados no guia de referências da trilha.
