@@ -7,7 +7,7 @@
 
 ### 00. Introdução ao Curso e Visão Geral (`00-introducao-ao-curso/`) — **[ATIVA]**
 - `00-indice.md` — Objetivos, pré-requisitos e sequência do módulo inaugural.
-- `01-visao-geral-do-curso-e-trilhas.md` — Estrutura completa do programa, panorama das 7 trilhas técnicas (`01` a `07`) e seus conteúdos, funcionamento do método socrático, sincronização de progresso e protocolo obrigatório de uma aula por chat.
+- `01-visao-geral-do-curso-e-trilhas.md` — Aula inaugural expositiva (sem perguntas): estrutura completa do programa, panorama das 7 trilhas técnicas (`01` a `07`) e seus conteúdos, funcionamento das aulas, sincronização de progresso e protocolo obrigatório de uma aula por chat.
 - `referencias.md` — Documentação interna do curso e índice consolidado das trilhas.
 
 ### 01. Python e Manipulação de Dados (`01-python-e-manipulacao-de-dados/`) — **[ATIVA]**

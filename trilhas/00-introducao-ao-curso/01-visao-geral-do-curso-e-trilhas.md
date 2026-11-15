@@ -13,11 +13,11 @@ A atuação técnica na Diretoria de Análise de Dados da ITAJr exige domínio i
 
 Para eliminar essas lacunas, o programa `PROFESSOR_IA` organiza a capacitação em uma grade sequencial auditada composta por **33 aulas**: esta **aula inaugural** (Módulo `00`) seguida por **7 trilhas técnicas** (`01` a `07`, totalizando **32 aulas técnicas**). Cada aula foi projetada para ser concluída em **15 a 25 minutos de estudo** e segue uma estrutura fixa de quatro seções: **Problema e Definição**, **Aplicação Prática**, **Critério de Decisão** e **Erros Comuns**.
 
-O modelo pedagógico utilizado pelo agente é o **ensino socrático por blocos**:
+O modelo pedagógico utilizado pelo agente nas **7 trilhas técnicas (`01` a `07`)** é o **ensino socrático por blocos** (enquanto esta aula inaugural `00` é **exclusivamente expositiva e não contém perguntas**):
 
-1. O tutor divide a aula em 3 a 5 blocos técnicos curtos.
+1. O tutor divide a aula técnica em 3 a 5 blocos curtos e objetivos.
 2. Ao final de cada bloco, formula 1 ou 2 perguntas de verificação conceitual ou prática sobre raciocínio técnico, interpretação de resultados e escolha de ferramentas.
-3. O aluno só avança após demonstrar compreensão real da lógica do bloco; em caso de falha de raciocínio, o tutor aponta o erro conceitual e solicita reformulação.
+3. Se o aluno errar ou der uma resposta incompleta, o tutor corrige o equívoco, completa diretamente o que faltou e segue com a aula para o bloco seguinte (sem repetir a mesma pergunta nem exigir nova tentativa).
 
 Além do formato das aulas, há uma restrição operacional crítica de engenharia de contexto: **toda aula deve ser realizada em um chat novo**. Conversas longas que acumulam múltiplas aulas saturam e poluem a janela de contexto do modelo de linguagem. Quando isso ocorre, instruções antigas perdem prioridade de atenção, trechos de código de aulas anteriores interferem nas perguntas da aula atual e a avaliação socrática perde precisão. Por essa razão, cada sessão de chat executa **estritamente uma única aula**, do diagnóstico inicial até a sincronização do progresso na nuvem.
 
@@ -53,9 +53,9 @@ Toda sessão de estudo executa o seguinte ciclo determinístico no repositório 
    -> seleciona a próxima aula não concluída em trilhas/
         |
         v
-[3. Condução Socrática (1 única aula)]
-   -> apresentação da(s) fonte(s) (com abertura opcional de URLs)
-   -> 3 a 5 blocos técnicos com perguntas de verificação
+[3. Condução da Aula (1 única aula)]
+   -> aula inaugural (00): exposição direta sobre o curso, sem perguntas
+   -> trilhas técnicas (01 a 07): apresentação da(s) fonte(s) + 3 a 5 blocos com perguntas (e correção/complementação direta caso falte algo)
         |
         v
 [4. Encerramento e Sincronização]
@@ -82,5 +82,5 @@ Para extrair o máximo retorno técnico do programa, utilize os critérios abaix
 
 - **Fazer várias aulas no mesmo chat:** Continuar no mesmo chat após terminar uma aula acumula histórico irrelevante, degrada a atenção do modelo e mistura conceitos de aulas diferentes. *Correção:* encerre a conversa após `python scripts/sync_progresso.py` e abra um chat novo; seu progresso é retomado automaticamente via `identificar_aluno.py`.
 - **Pular trilhas de fundação:** Avançar direto para as Trilhas `06` ou `07` sem dominar `Pydantic`/`FastAPI`, SQL, estatística e validação de ML impede diagnosticar falhas reais em produção. *Correção:* siga a sequência de `00-grade-curricular.md`.
-- **Pedir respostas prontas ou decorar sintaxe:** O tutor avalia raciocínio técnico e escolha de ferramentas, não memorização de parâmetros. *Correção:* responda com sua justificativa em cada bloco; se errar apenas um nome de método mantendo a lógica correta, o tutor corrigirá a sintaxe e avançará.
+- **Pedir respostas prontas ou decorar sintaxe:** O tutor avalia raciocínio técnico e escolha de ferramentas, não memorização de parâmetros. *Correção:* responda com sua justificativa em cada bloco das trilhas `01` a `07`; se houver erro conceitual, resposta incompleta ou apenas troca de nome de método, o tutor corrigirá/completará diretamente os pontos necessários e avançará com a aula.
 - **Editar `trilhas/` ou rodar `git push` manualmente:** As aulas são mantidas centralmente pela Diretoria e o envio de progresso ocorre via API autenticada. *Correção:* nunca edite `trilhas/` nem execute `git push`; utilize apenas `python scripts/sync_progresso.py`.

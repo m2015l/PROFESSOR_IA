@@ -11,7 +11,7 @@ Apresentar ao membro da Diretoria de Análise de Dados da ITAJr a estrutura comp
 ## Sequência de Aulas
 
 1. **`01-visao-geral-do-curso-e-trilhas.md`**
-   - Estrutura curricular do programa (1 aula inaugural + 7 trilhas técnicas totalizando 33 aulas), conteúdos detalhados das Trilhas `01` a `07`, fluxo operacional de cada sessão socrática, critérios de navegação entre aulas e referências avançadas, e regra estrita de isolamento em chat novo a cada aula.
+   - Estrutura curricular do programa (1 aula inaugural expositiva, sem perguntas + 7 trilhas técnicas totalizando 33 aulas), conteúdos detalhados das Trilhas `01` a `07`, fluxo operacional das sessões, critérios de navegação entre aulas e referências avançadas, e regra estrita de isolamento em chat novo a cada aula.
 
 ## Material de Referência e Consulta
 Consulte o arquivo `referencias.md` desta pasta para acessar os índices completos da grade curricular e os documentos operacionais do repositório `PROFESSOR_IA`.
