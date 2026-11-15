@@ -5,6 +5,11 @@
 
 ## Trilhas Curriculares
 
+### 00. Introdução ao Curso e Visão Geral (`00-introducao-ao-curso/`) — **[ATIVA]**
+- `00-indice.md` — Objetivos, pré-requisitos e sequência do módulo inaugural.
+- `01-visao-geral-do-curso-e-trilhas.md` — Estrutura completa do programa, panorama das 7 trilhas técnicas (`01` a `07`) e seus conteúdos, funcionamento do método socrático, sincronização de progresso e protocolo obrigatório de uma aula por chat.
+- `referencias.md` — Documentação interna do curso e índice consolidado das trilhas.
+
 ### 01. Python e Manipulação de Dados (`01-python-e-manipulacao-de-dados/`) — **[ATIVA]**
 - `00-indice.md` — Objetivos, pré-requisitos e sequência da trilha.
 - `01-estruturas-nativas-e-controle-de-fluxo.md` — Estruturas nativas (`list`, `tuple`, `dict`, `set`), referências, geradores, funções e `Type Hints`.
@@ -68,4 +73,4 @@
 ---
 
 ## Status da Grade
-- **Conclusão das 7 Trilhas da Grade:** Todas as **7 trilhas curriculares** (`01` a `07`) encontram-se **`[ATIVAS]`** e integralmente geradas, totalizando **32 aulas técnicas** sequenciais auditadas e todas as **29 fontes** do acervo convertidas.
+- **Conclusão Completa da Grade:** O **módulo inaugural** (`00`) e todas as **7 trilhas técnicas** (`01` a `07`) encontram-se **`[ATIVAS]`** e integralmente geradas, totalizando **33 aulas** sequenciais auditadas (1 aula inaugural + 32 aulas técnicas) e todas as **29 fontes** do acervo convertidas.

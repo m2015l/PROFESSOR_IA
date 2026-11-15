@@ -35,13 +35,16 @@ Envie uma mensagem inicial no chat (por exemplo: *"Quero começar as aulas"*):
 
 ## Como Funcionam as Aulas
 
-- **Grade curricular sequencial:** 7 trilhas (32 aulas) descritas em [`trilhas/00-grade-curricular.md`](trilhas/00-grade-curricular.md).
+- **Grade curricular sequencial:** 1 aula inaugural (`00`) + 7 trilhas técnicas (`01` a `07`), totalizando **33 aulas** descritas em [`trilhas/00-grade-curricular.md`](trilhas/00-grade-curricular.md).
+- **Aula inaugural de alinhamento:** na primeira aula (`00-introducao-ao-curso/01-visao-geral-do-curso-e-trilhas.md`), você conhecerá a estrutura do curso, todas as trilhas e conteúdos que serão estudados e o fluxo operacional das sessões.
+- **Uma aula por chat (chat novo obrigatório):** cada aula deve ser feita em um **chat novo e limpo**. Ao finalizar e sincronizar uma aula, encerre a conversa atual e abra um novo chat (nova conversa no Antigravity ou nova sessão no Claude Code / Codex CLI / Gemini CLI) para fazer a aula seguinte — o tutor identificará automaticamente onde você parou e recusará iniciar duas aulas no mesmo chat para garantir que o contexto do modelo nunca se perca.
 - **Ensino socrático:** cada aula é dividida em blocos técnicos curtos com perguntas de verificação; você avança após demonstrar domínio do raciocínio de cada bloco.
 - **Sincronização automática:** ao concluir cada aula, o agente atualiza `progresso.local.md` (arquivo local ignorado pelo Git) e executa `python scripts/sync_progresso.py` para registrar seu progresso na nuvem.
 - **Atualizações contínuas:** no início de cada sessão, o agente executa `git pull --ff-only origin main` para baixar novas aulas ou trilhas publicadas pela Diretoria.
 
 ## Regras Importantes
 
+- **Abra sempre um chat novo** para cada aula iniciada.
 - **Não altere** nenhum arquivo dentro da pasta `trilhas/`.
 - **Não execute `git push`** neste repositório — o envio do seu progresso é feito exclusivamente via `python scripts/sync_progresso.py`.
 - **Não compartilhe** seu `ALUNO_TOKEN` nem o arquivo `.aluno.env`.
