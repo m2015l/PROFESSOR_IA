@@ -25,6 +25,65 @@ No pandas, essas operações fundamentam-se em dois subsistemas:
 
 ---
 
+### Fundamentos e Exemplos Progressivos Passo a Passo (Partindo do Zero)
+
+Veja em exemplos mínimos a diferença entre resumir grupos (`.agg`), propagar métricas para cada linha (`.transform`) e trabalhar com janelas no tempo (`shift`, `resample`, `rolling`):
+
+1. **`.agg` (reduz para 1 linha por grupo) vs `.transform` (mantém todas as linhas originais):**
+   Imagine uma tabela com 3 vendas de duas lojas (`A` e `B`).
+   - Se você quiser uma tabela **resumo** com apenas 2 linhas (uma para a loja `A` e outra para `B`), use `.groupby(...).agg(...)`. Passando `as_index=False`, a chave do grupo continua como coluna normal; passando `dropna=False`, grupos sem categoria (`NaN`) não são descartados.
+   - Se você quiser manter **todas as 3 linhas originais** e apenas adicionar uma nova coluna com o total da loja correspondente em cada venda, use `.transform("sum")`.
+
+   ```python
+   import pandas as pd
+
+   vendas = pd.DataFrame({
+       "loja": ["A", "A", "B"],
+       "valor": [100.0, 300.0, 200.0],
+   })
+
+   # .agg: devolve 1 linha por loja (2 linhas no total)
+   resumo = vendas.groupby("loja", as_index=False).agg(
+       total=("valor", "sum"),
+       media=("valor", "mean"),
+   )
+   print(resumo)
+   # Saída: loja A -> total=400.0, media=200.0 | loja B -> total=200.0, media=200.0
+
+   # .transform: devolve 3 valores alinhados às 3 linhas originais ([400.0, 400.0, 200.0])
+   vendas["total_da_loja"] = vendas.groupby("loja")["valor"].transform("sum")
+   vendas["participacao"] = vendas["valor"] / vendas["total_da_loja"]
+   print(vendas)
+   # Linha 0 (loja A, 100): total_da_loja=400.0, participacao=0.25
+   # Linha 1 (loja A, 300): total_da_loja=400.0, participacao=0.75
+   # Linha 2 (loja B, 200): total_da_loja=200.0, participacao=1.00
+   ```
+
+2. **Operações no tempo (`to_datetime`, `shift`, `resample` e `rolling`):**
+   - `pd.to_datetime(col, utc=True)` converte strings de data/hora para objetos temporais com fuso UTC.
+   - `serie.shift(1)` desloca os valores 1 posição para baixo, trazendo o valor do período anterior para a linha atual (o primeiro período vira `NaN`).
+   - `.set_index("data").resample("1D")["valor"].sum()` agrupa eventos irregulares por dia completo do calendário (`"1D"`), somando tudo o que ocorreu no mesmo dia (e preenchendo dias sem eventos com `0` na soma).
+   - `.rolling(window=2, min_periods=1).mean()` calcula a média da linha atual junto com a linha anterior (janela móvel de 2 períodos).
+
+   ```python
+   ts = pd.DataFrame({
+       "data": pd.to_datetime(["2026-03-01 10:00", "2026-03-01 15:00", "2026-03-03 09:00"], utc=True),
+       "valor": [50.0, 70.0, 90.0],
+   }).set_index("data")
+
+   diario = ts.resample("1D")["valor"].sum().to_frame(name="receita")
+   # Gera 3 linhas contínuas: 2026-03-01 (120.0), 2026-03-02 (0.0), 2026-03-03 (90.0)
+
+   diario["ontem"] = diario["receita"].shift(1)
+   # [NaN, 120.0, 0.0]
+
+   diario["media_2d"] = diario["receita"].rolling(window=2, min_periods=1).mean()
+   # [120.0, 60.0, 45.0]
+   print(diario)
+   ```
+
+---
+
 ## 2. Aplicação Prática
 
 O código a seguir demonstra o uso combinado de agregações nomeadas (`.agg`), cálculo de métricas intragrupo (`.transform`), reamostragem temporal diária (`resample`) e médias móveis de 3 dias (`rolling`) por unidade operacional:

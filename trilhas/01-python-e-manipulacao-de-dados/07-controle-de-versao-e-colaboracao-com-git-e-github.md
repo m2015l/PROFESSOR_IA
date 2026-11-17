@@ -27,6 +27,42 @@ No trabalho em equipe com o **GitHub**, a integração de código ocorre por mei
 
 ---
 
+### Fundamentos e Exemplos Progressivos Passo a Passo (Partindo do Zero)
+
+Veja do zero a sequência mínima de comandos para criar, salvar e ramificar alterações antes de executar o fluxo completo em equipe:
+
+1. **Iniciando um repositório e registrando seu primeiro snapshot (`status`, `add`, `commit`):**
+   Um **repositório Git** é uma pasta comum que contém uma subpasta oculta `.git/` onde todo o histórico de versões fica guardado. Quando você cria ou edita um arquivo no disco (*Working Directory*), o Git ainda não salvou aquela versão no histórico. O ciclo básico tem dois passos: primeiro você seleciona quais arquivos alterados entrarão na foto usando `git add`; depois você grava a foto definitiva no histórico usando `git commit -m "mensagem"`.
+
+   ```bash
+   mkdir meu_projeto && cd meu_projeto
+   git init                              # Cria o repositório local (.git/)
+   echo "print('v1')" > app.py
+   git status                            # Mostra 'app.py' como untracked (não rastreado)
+
+   git add app.py                        # Coloca app.py na Staging Area (pronto para salvar)
+   git commit -m "Cria script inicial"   # Grava o snapshot permanente com um hash único (ex.: a1b2c3d)
+   git log --oneline                     # Lista o histórico resumido de commits
+   ```
+
+2. **Criando uma branch paralela e integrando alterações (`switch -c`, `merge`):**
+   A linha principal chama-se normalmente `main`, e **`HEAD`** indica em qual branch você está trabalhando agora. Para testar uma alteração sem mexer na `main`, criamos uma branch nova com `git switch -c nome-da-branch`. Depois de commitar na branch nova, voltamos para a `main` e trazemos aquelas alterações com `git merge`.
+
+   ```bash
+   git switch -c feat/filtro             # Cria a branch 'feat/filtro' e move o HEAD para ela
+   echo "print('filtro ativo')" >> app.py
+   git add app.py
+   git commit -m "Adiciona filtro"       # Este commit existe apenas em 'feat/filtro'
+
+   git switch main                       # Volta para a branch principal (sem o filtro ainda)
+   git merge feat/filtro                 # Integra o commit de 'feat/filtro' na 'main'
+   ```
+
+3. **Sincronizando com o GitHub (`remote`, `fetch`, `push`):**
+   O repositório remoto no GitHub costuma receber o apelido `origin`. `git push origin <branch>` envia seus commits locais para o GitHub; `git fetch origin` baixa os novos commits do GitHub para o seu Git local **sem alterar seus arquivos atuais**, permitindo inspecionar antes de executar `git merge origin/main`.
+
+---
+
 ## 2. Aplicação Prática
 
 O roteiro abaixo demonstra o fluxo operacional completo para iniciar um projeto de dados Python versionado, isolar uma nova funcionalidade, sincronizar atualizações remotas e prepará-la para revisão via Pull Request no GitHub.

@@ -26,6 +26,66 @@ O pipeline de preparação tabular no pandas divide-se em três etapas determin�
 
 ---
 
+### Fundamentos e Exemplos Progressivos Passo a Passo (Partindo do Zero)
+
+Veja isoladamente como funciona cada operação de leitura, limpeza e combinação tabular antes de reuni-las no pipeline completo:
+
+1. **Leitura controlada com `pd.read_csv`:**
+   Por padrão, `read_csv` tenta adivinhar o tipo de cada coluna e pode remover zeros à esquerda de CPFs ou CEPs (`"0123"` vira número `123`). Passar `dtype={"coluna": "string"}` preserva o texto original; `na_values=[...]` converte textos como `"N/D"` em nulos reais; e `parse_dates=[...]` transforma textos de data em objetos temporais.
+
+   ```python
+   import io
+   import pandas as pd
+
+   csv_exemplo = "cpf,qtd,data\n01234567890,10,2026-10-01\n98765432100,N/D,2026-10-02"
+   df_lido = pd.read_csv(
+       io.StringIO(csv_exemplo),
+       dtype={"cpf": "string"},
+       na_values=["N/D"],
+       parse_dates=["data"],
+   )
+   print(df_lido["cpf"].iloc[0])   # Saída: 01234567890 (zero inicial preservado!)
+   print(df_lido["qtd"].isna().tolist())  # Saída: [False, True]
+   ```
+
+2. **Nulos (`isna`, `fillna`), duplicatas (`drop_duplicates`) e limpeza de texto (`.str`):**
+   - `df["col"].isna()` devolve `True` onde o valor está faltando; `fillna(valor)` preenche esses nulos.
+   - `df["col"].str.strip().str.upper()` remove espaços nas pontas e converte textos para maiúsculas com segurança, mesmo quando há valores nulos na coluna.
+   - `drop_duplicates(subset=["id"], keep="last")` remove linhas com `"id"` repetido mantendo apenas a última ocorrência (útil após ordenar por data).
+
+   ```python
+   df_sujo = pd.DataFrame({
+       "id": ["C1", "C1", "C2"],
+       "uf": [" sp ", "SP", None],
+       "valor": [100.0, 150.0, None],
+   })
+   df_sujo["uf"] = df_sujo["uf"].str.strip().str.upper()  # ' sp ' -> 'SP', None continua <NA>
+   df_sujo["valor"] = df_sujo["valor"].fillna(0.0)        # Preenche None com 0.0
+   df_limpo = df_sujo.drop_duplicates(subset=["id"], keep="last")
+   print(df_limpo)  # Mantém a linha 1 (C1, valor 150.0) e a linha 2 (C2, valor 0.0)
+   ```
+
+3. **Junção relacional (`pd.merge`) e remodelagem (`pd.melt` / `pd.concat`):**
+   - `pd.merge(tabela_a, tabela_b, on="chave", how="left", validate="many_to_one")` cruza duas tabelas pela coluna em comum `"chave"`. Usar `how="left"` garante que nenhuma linha da tabela da esquerda desapareça se não houver correspondência na direita; usar `validate="many_to_one"` lança erro imediatamente se a tabela da direita tiver chaves repetidas (evitando duplicação silenciosa).
+   - `pd.melt(df, id_vars=[...], value_vars=[...], var_name=..., value_name=...)` transforma várias colunas em pares de linhas (formato longo).
+
+   ```python
+   pedidos = pd.DataFrame({"pedido": [1, 2], "cli_id": ["C1", "C3"]})
+   clientes = pd.DataFrame({"cli_id": ["C1", "C2"], "nome": ["Ana", "Bruno"]})
+
+   # how="left" mantém o pedido 2 (C3) mesmo sem cadastro em clientes (nome = NaN)
+   cruzado = pd.merge(pedidos, clientes, on="cli_id", how="left", validate="many_to_one")
+   print(cruzado)
+
+   # Formato largo -> formato longo com melt
+   largo = pd.DataFrame({"cli_id": ["C1"], "jan": [100], "fev": [200]})
+   longo = pd.melt(largo, id_vars=["cli_id"], value_vars=["jan", "fev"],
+                   var_name="mes", value_name="receita")
+   print(longo)  # Gera 2 linhas: (C1, jan, 100) e (C1, fev, 200)
+   ```
+
+---
+
 ## 2. Aplicação Prática
 
 O script abaixo implementa um pipeline de ingestão controlada, saneamento de tipos e strings, deduplicação por carimbo de tempo, validação de cardinalidade no `merge` e remodelagem com `melt`:

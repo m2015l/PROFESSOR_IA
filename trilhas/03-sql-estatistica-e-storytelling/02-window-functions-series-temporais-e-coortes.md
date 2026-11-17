@@ -27,6 +27,57 @@ A aplicação conjunta de funções de janela e aritmética temporal sustenta du
 
 ---
 
+### Fundamentos e Exemplos Progressivos Passo a Passo (Partindo do Zero)
+
+Para entender *Window Functions* do zero, imagine uma pequena tabela `receitas` com apenas 3 linhas:
+
+| mes | loja | valor |
+| :--- | :--- | ---: |
+| `2025-01` | `A` | 100 |
+| `2025-02` | `A` | 200 |
+| `2025-01` | `B` | 300 |
+
+1. **Diferença entre `GROUP BY` e `OVER (PARTITION BY ...)`:**
+   Se fizermos `SELECT loja, SUM(valor) FROM receitas GROUP BY loja`, as 3 linhas viram apenas 2 linhas (`A -> 300`, `B -> 300`). Já quando escrevemos `SUM(valor) OVER (PARTITION BY loja)`, o SQL calcula a soma daquela loja, **mantém todas as 3 linhas** e coloca o total do grupo ao lado de cada linha:
+
+   ```sql
+   SELECT
+       mes,
+       loja,
+       valor,
+       SUM(valor) OVER (PARTITION BY loja) AS total_da_loja
+   FROM receitas;
+   -- Saída:
+   -- 2025-01 | A | 100 | 300
+   -- 2025-02 | A | 200 | 300
+   -- 2025-01 | B | 300 | 300
+   ```
+
+2. **Adicionando `ORDER BY` dentro de `OVER (...)` para soma acumulada e ranking:**
+   Quando incluímos `ORDER BY mes` dentro do `OVER`, o cálculo passa a acompanhar a ordem das linhas naquela partição:
+   - `SUM(valor) OVER (PARTITION BY loja ORDER BY mes)` faz a soma acumulada passo a passo.
+   - `ROW_NUMBER() OVER (PARTITION BY loja ORDER BY valor DESC)` numera `1, 2, ...` em ordem decrescente.
+   - `LAG(valor, 1) OVER (PARTITION BY loja ORDER BY mes)` busca o valor da **linha imediatamente anterior** na mesma loja (devolvendo `NULL` na primeira linha).
+
+   ```sql
+   SELECT
+       mes,
+       loja,
+       valor,
+       SUM(valor) OVER (
+           PARTITION BY loja
+           ORDER BY mes
+           ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+       ) AS acumulado_loja,
+       LAG(valor, 1) OVER (PARTITION BY loja ORDER BY mes) AS valor_mes_anterior
+   FROM receitas;
+   -- Para loja 'A':
+   -- 2025-01 | A | 100 | acumulado=100 | valor_mes_anterior=NULL
+   -- 2025-02 | A | 200 | acumulado=300 | valor_mes_anterior=100
+   ```
+
+---
+
 ## 2. Aplicação Prática
 
 ### 2.1. Séries Temporais Contínuas, Média Móvel e Comparação YoY

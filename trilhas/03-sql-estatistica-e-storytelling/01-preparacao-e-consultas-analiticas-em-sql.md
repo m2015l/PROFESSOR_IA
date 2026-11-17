@@ -29,6 +29,68 @@ Essa sequência explica por que um *alias* definido no `SELECT` não pode ser us
 
 ---
 
+### Fundamentos e Exemplos Progressivos Passo a Passo (Partindo do Zero)
+
+Caso você nunca tenha escrito consultas em SQL, veja do zero como cada cláusula funciona em tabelas mínimas antes de passar às consultas analíticas completas:
+
+1. **Consulta básica (`SELECT`, `FROM`, `WHERE`, `ORDER BY`, `LIMIT`):**
+   Em SQL, uma tabela funciona como uma planilha com colunas nomeadas e linhas de registro.
+   - `SELECT col1, col2` escolhe quais colunas exibir (`SELECT *` exibe todas).
+   - `FROM tabela` indica de qual tabela ler os dados.
+   - `WHERE condicao` filtra apenas as linhas que atendem à condição (atenção: nulos são testados com `IS NULL` ou `IS NOT NULL`, nunca com `= NULL`).
+   - `ORDER BY col DESC` ordena do maior para o menor (`ASC` ordena do menor para o maior) e `LIMIT N` devolve no máximo `N` linhas.
+
+   ```sql
+   -- Tabela 'vendas': (id=1, loja='SP', valor=100), (id=2, loja='RJ', valor=300), (id=3, loja='SP', valor=200)
+   SELECT id, valor
+   FROM vendas
+   WHERE loja = 'SP' AND valor >= 150
+   ORDER BY valor DESC
+   LIMIT 5;
+   -- Resultado: apenas a linha (id=3, valor=200)
+   ```
+
+2. **Agrupamentos (`GROUP BY`) e filtros sobre grupos (`HAVING`):**
+   Funções de agregação resumem várias linhas em um único número: `COUNT(*)` conta linhas, `SUM(col)` soma valores, `AVG(col)` calcula a média, `MIN(col)` e `MAX(col)` acham extremos. Quando combinadas com `GROUP BY loja`, o banco calcula um resumo por loja. Para filtrar grupos **depois** de resumidos, usa-se `HAVING` (nunca `WHERE`).
+
+   ```sql
+   SELECT loja, COUNT(*) AS qtd_vendas, SUM(valor) AS total
+   FROM vendas
+   GROUP BY loja
+   HAVING SUM(valor) > 250;
+   -- Grupos calculados: SP (qtd=2, total=300) e RJ (qtd=1, total=300) -> ambos passam no HAVING
+   ```
+
+3. **Combinando tabelas (`INNER JOIN` vs `LEFT JOIN`):**
+   - `INNER JOIN` traz apenas linhas que possuem chave correspondente nas **duas** tabelas.
+   - `LEFT JOIN` mantém **todas** as linhas da tabela da esquerda, preenchendo as colunas da direita com `NULL` quando não houver correspondência.
+
+   ```sql
+   -- pedidos(id, cli_id): (1, 'C1'), (2, 'C9')  |  clientes(cli_id, nome): ('C1', 'Ana')
+   SELECT p.id, c.nome
+   FROM pedidos p
+   LEFT JOIN clientes c ON p.cli_id = c.cli_id;
+   -- Resultado: (1, 'Ana') e (2, NULL) -- se fosse INNER JOIN, o pedido 2 sumiria.
+   ```
+
+4. **Lógica condicional (`CASE WHEN`), nulos (`COALESCE`, `NULLIF`) e CTEs (`WITH`):**
+   - `CASE WHEN cond THEN a ELSE b END` funciona como `if/else` por linha.
+   - `COALESCE(val, 0)` substitui `NULL` por `0`; `NULLIF(x, 0)` transforma `0` em `NULL` (evitando erro de divisão por zero).
+   - `WITH passo1 AS (SELECT ...)` cria uma **CTE** (*Common Table Expression*), um resultado temporário nomeado que pode ser consultado no `SELECT` seguinte para organizar queries longas passo a passo.
+
+   ```sql
+   WITH base_limpa AS (
+       SELECT id, COALESCE(valor, 0) AS val_seguro,
+              CASE WHEN valor >= 200 THEN 'ALTO' ELSE 'PADRAO' END AS faixa
+       FROM vendas
+   )
+   SELECT faixa, COUNT(*) AS total_itens
+   FROM base_limpa
+   GROUP BY faixa;
+   ```
+
+---
+
 ## 2. Aplicação Prática
 
 A preparação de dados em SQL compreende quatro operações estruturais: perfilamento de distribuição e detecção de duplicatas, limpeza e coerção de tipos, remodelagem tabular (*pivoting* / *unpivoting*) e agregações multidimensionais com CTEs e `GROUPING SETS`.

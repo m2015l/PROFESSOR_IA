@@ -30,6 +30,62 @@ O **Streamlit** resolve essa lacuna permitindo construir aplicações web intera
 
 ---
 
+### Fundamentos e Exemplos Progressivos Passo a Passo (Partindo do Zero)
+
+Veja do zero como um script Streamlit funciona na tela e por que cache e estado de sessão são necessários:
+
+1. **Primeiro app mínimo e o ciclo de reexecução (*rerun*):**
+   No Streamlit, funções como `st.title(...)` desenham elementos na página web e funções de entrada (*widgets*) como `st.slider(...)` ou `st.selectbox(...)` desenham controles interativos **e devolvem o valor escolhido pelo usuário** diretamente para uma variável Python. Sempre que o usuário mexe em qualquer controle na tela, o Streamlit executa o arquivo Python inteiro **da linha 1 até a última linha novamente**.
+
+   ```python
+   import streamlit as st
+
+   st.title("Calculadora Simples")
+   numero = st.slider("Escolha um número", min_value=1, max_value=10, value=5)
+   st.write("O dobro do número escolhido é:", numero * 2)
+   # Ao mover o controle para 8, o script inteiro roda de novo com numero = 8 e exibe 16.
+   ```
+
+2. **Preservando memória entre cliques com `st.session_state`:**
+   Como todo o script roda novamente a cada clique, uma variável comum como `cliques = 0` voltaria para `0` toda vez que o usuário apertasse um botão. Para evitar isso, usamos o dicionário `st.session_state`, inicializando a chave apenas se ela ainda não existir (`if "cliques" not in st.session_state:`).
+
+   ```python
+   import streamlit as st
+
+   if "cliques" not in st.session_state:
+       st.session_state["cliques"] = 0
+
+   if st.button("Adicionar 1"):
+       st.session_state["cliques"] += 1
+
+   st.write("Total de cliques na sessão:", st.session_state["cliques"])
+   ```
+
+3. **Decoradores de cache (`@st.cache_data` vs `@st.cache_resource`) e formulários (`st.form`):**
+   Um **decorador** (escrito com `@nome` imediatamente acima de um `def`) envolve uma função para adicionar um comportamento automático a ela.
+   - Colocar `@st.cache_data(ttl=300)` acima de uma função que lê um CSV faz o Streamlit guardar o `DataFrame` resultante por 300 segundos, evitando reler o arquivo do disco a cada clique em um filtro.
+   - Colocar `@st.cache_resource` acima de uma função guarda uma única instância compartilhada de conexões de banco ou modelos pesados de ML.
+   - Agrupar filtros dentro de `with st.form("id"):` faz a página esperar o clique em `st.form_submit_button(...)` para disparar o *rerun*, em vez de recarregar a cada campo alterado.
+
+   ```python
+   import pandas as pd
+   import streamlit as st
+
+   @st.cache_data
+   def carregar_tabela() -> pd.DataFrame:
+       return pd.DataFrame({"produto": ["A", "B"], "preco": [10.0, 25.0]})
+
+   with st.form("meu_filtro"):
+       minimo = st.number_input("Preço mínimo", value=0.0)
+       enviado = st.form_submit_button("Filtrar")
+
+   if enviado:
+       df = carregar_tabela()
+       st.dataframe(df[df["preco"] >= minimo])
+   ```
+
+---
+
 ## 2. Aplicação Prática
 
 O script abaixo (`app_vendas.py`) implementa um painel analítico completo utilizando `@st.cache_data` com expiração, `@st.cache_resource` para configuração compartilhada, `st.form` na barra lateral para filtragem em lote, `st.session_state` para registro de ações e `@st.fragment` para inspeção isolada de SKUs:

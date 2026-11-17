@@ -25,6 +25,74 @@ Duas propriedades operacionais distinguem o pandas de matrizes puras:
 
 ---
 
+### Fundamentos e Exemplos Progressivos Passo a Passo (Partindo do Zero)
+
+Antes de construir um fluxo completo, veja passo a passo como criar e operar cada estrutura básica do NumPy e do pandas a partir do zero:
+
+1. **Criando arrays no NumPy, operações vetorizadas e fatias (*views* vs `.copy()`):**
+   No NumPy, `np.array(lista)` converte uma lista Python em um vetor homogêneo (`ndarray`). Diferente de uma lista comum (em que multiplicar por `2` duplicaria a lista), em um `ndarray` os operadores aritméticos e lógicos aplicam-se automaticamente a **cada elemento** sem laço `for`. Além disso, fatiar com `arr[inicio:fim]` cria uma janela (*view*) para a mesma memória da original; para desvincular, usa-se `.copy()`.
+
+   ```python
+   import numpy as np
+
+   precos = np.array([100.0, 200.0, 300.0, 400.0])
+   print(precos.dtype, precos.shape)  # Saída: float64 (4,)
+
+   # Operação vetorizada: aplica 10% de desconto em todos os itens de uma vez
+   com_desconto = precos * 0.90
+   print(com_desconto)                # Saída: [ 90. 180. 270. 360.]
+
+   # np.where(condicao, valor_se_verdadeiro, valor_se_falso)
+   etiquetas = np.where(precos >= 250.0, "CARO", "NORMAL")
+   print(etiquetas)                   # Saída: ['NORMAL' 'NORMAL' 'CARO' 'CARO']
+
+   # View vs Copy em slices do NumPy
+   janela = precos[0:2]               # Índices 0 e 1 compartilham a memória de 'precos'
+   janela[0] = 999.0
+   print(precos)                      # Saída: [999. 200. 300. 400.] ('precos' mudou!)
+
+   copia_segura = precos[0:2].copy()  # Cria buffer independente
+   copia_segura[0] = 10.0
+   print(precos[0])                   # Saída: 999.0 (inalterado)
+   ```
+
+2. **Criando `Series` e `DataFrame` no pandas e alinhamento por índice:**
+   Uma `pd.Series` associa cada valor a um rótulo (`index`), e um `pd.DataFrame` reúne várias colunas nomeadas a partir de um dicionário `{nome_coluna: lista_valores}`. Ao somar duas `Series`, o pandas alinha os valores pelo **rótulo** (e não pela ordem); rótulos que faltam em uma delas resultam em `NaN` (*Not a Number*).
+
+   ```python
+   import pandas as pd
+
+   s1 = pd.Series([10, 20], index=["A", "B"])
+   s2 = pd.Series([5, 100], index=["B", "C"])
+   print(s1 + s2)
+   # Saída:
+   # A      NaN   (A não existe em s2)
+   # B     25.0   (20 + 5 alinhados pelo rótulo 'B')
+   # C      NaN   (C não existe em s1)
+
+   # Para tratar faltantes como 0 durante a soma:
+   print(s1.add(s2, fill_value=0))  # A: 10.0, B: 25.0, C: 100.0
+   ```
+
+3. **Seleção com `.loc` (rótulos) vs `.iloc` (posições) e filtros booleanos:**
+   Para acessar linhas e colunas em um `DataFrame`, `df.loc[linhas, colunas]` utiliza os **nomes/rótulos** (com intervalo final incluso), enquanto `df.iloc[linhas, colunas]` utiliza **posições numéricas começando em 0** (com intervalo final exclusivo, igual às listas do Python). Para filtrar linhas por condição, cada comparação fica entre parênteses ligada por `&` (E), `|` (OU) ou `~` (NÃO).
+
+   ```python
+   df = pd.DataFrame(
+       {"produto": ["Teclado", "Mouse", "Monitor"], "preco": [150.0, 80.0, 900.0]},
+       index=["P1", "P2", "P3"],
+   )
+
+   print(df.loc["P1":"P2", ["produto", "preco"]])  # Inclui 'P1' e 'P2' pelos rótulos
+   print(df.iloc[0:2, 0:2])                        # Posições 0 e 1 (índice 2 fica de fora)
+
+   # Filtro booleano + atribuição segura em uma única chamada .loc
+   caro_ou_barato = df.loc[(df["preco"] >= 100.0) & (df["produto"] != "Teclado"), "produto"]
+   print(list(caro_ou_barato))  # Saída: ['Monitor']
+   ```
+
+---
+
 ## 2. Aplicação Prática
 
 O código a seguir demonstra a diferença prática entre lógica condicional vetorizada com NumPy e pandas, o alinhamento automático de índices no cálculo de margens e a seleção e atualização segura com `.loc`:

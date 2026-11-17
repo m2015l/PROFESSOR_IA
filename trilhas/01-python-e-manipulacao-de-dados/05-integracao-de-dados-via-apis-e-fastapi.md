@@ -27,6 +27,69 @@ Uma arquitetura robusta de integração de dados em Python apoia-se em três com
 
 ---
 
+### Fundamentos e Exemplos Progressivos Passo a Passo (Partindo do Zero)
+
+Veja do zero cada peça usada antes de integrá-las em um serviço completo:
+
+1. **Requisições HTTP com `httpx` (`GET`, `timeout` e `raise_for_status()`):**
+   Quando um programa busca dados na internet ou em outro serviço interno, ele envia uma requisição HTTP (`GET` para ler, `POST` para enviar/processar) para uma URL e recebe um código numérico de status (`200` = sucesso; `400`/`422` = dados inválidos; `429` = excesso de chamadas; `500` = falha no servidor) junto de um corpo de texto em formato **JSON** (muito parecido com dicionários e listas em Python).
+   O bloco `with httpx.Client(timeout=5.0) as client:` abre uma conexão reutilizável com tempo máximo de espera de 5 segundos e a fecha automaticamente ao sair do bloco.
+
+   ```python
+   import httpx
+
+   with httpx.Client(timeout=5.0) as client:
+       resp = client.get("https://api.exemplo.com/itens", params={"page": 1})
+       resp.raise_for_status()   # Lança erro automaticamente se o status for >= 400
+       dados = resp.json()       # Converte o texto JSON da resposta em dict/list Python
+   ```
+
+2. **Validação de esquemas com `Pydantic` (`BaseModel`, `Field` e `ValidationError`):**
+   Um dicionário vindo de fora pode ter campos faltando ou tipos errados (ex.: `"valor": -50` ou `"valor": "abc"`). No Pydantic, criamos uma classe herdando de `BaseModel` onde cada atributo declara seu tipo e restrições opcionais via `Field(...)` (`gt=0` = maior que 0; `ge=0` = maior ou igual a 0; `min_length=3` = texto com ao menos 3 caracteres).
+   - `MinhaClasse.model_validate(dicionario)` valida e converte tipos; se falhar, lança `ValidationError`.
+   - `objeto.model_dump()` converte o modelo validado de volta para um `dict` comum.
+
+   ```python
+   from pydantic import BaseModel, Field, ValidationError
+
+   class Produto(BaseModel):
+       sku: str = Field(..., min_length=3)
+       preco: float = Field(..., gt=0.0)
+
+   valido = Produto.model_validate({"sku": "ABC", "preco": "19.5"})
+   print(valido.model_dump())  # Saída: {'sku': 'ABC', 'preco': 19.5} (converteu str para float)
+
+   try:
+       Produto.model_validate({"sku": "AB", "preco": -10.0})
+   except ValidationError as err:
+       print("Falhou na validação:", len(err.errors()), "erros encontrados")
+   ```
+
+3. **Criando uma rota mínima com `FastAPI`:**
+   No FastAPI, `app = FastAPI()` cria a aplicação. O decorador `@app.post("/rota", response_model=...)` registra uma função Python que será executada sempre que alguém enviar um `POST` para `/rota`:
+   - Parâmetros cujo tipo é uma classe `BaseModel` são lidos automaticamente do corpo JSON da requisição.
+   - Parâmetros simples anotados com `Query(...)` vêm na URL (`?minimo=10`).
+   - `raise HTTPException(status_code=400, detail="...")` devolve um erro HTTP claro ao cliente.
+
+   ```python
+   from fastapi import FastAPI, HTTPException
+   from pydantic import BaseModel
+
+   app = FastAPI()
+
+   class Entrada(BaseModel):
+       x: float
+       y: float
+
+   @app.post("/somar")
+   def somar(dados: Entrada, fator: float = 1.0) -> dict[str, float]:
+       if fator <= 0:
+           raise HTTPException(status_code=400, detail="fator deve ser positivo")
+       return {"resultado": (dados.x + dados.y) * fator}
+   ```
+
+---
+
 ## 2. Aplicação Prática
 
 O código abaixo demonstra as duas pontas da integração: (1) um cliente HTTP com timeout e validação Pydantic que converte lotes JSON validados em `DataFrame`, e (2) uma API FastAPI que recebe um lote de transações, processa métricas vetorizadas no pandas e devolve um contrato de resposta estritamente tipado:
