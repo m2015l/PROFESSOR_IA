@@ -24,7 +24,7 @@ Este documento consolida as obras e documentações oficiais utilizadas nas aula
      - Capítulo 9: *Debugging, Testing, and Deployment* (pp. 179–192) — Aula 03.
 
 3. **Documentações Oficiais de Agentes de Código (Links Diretos):**
-   - **Google Antigravity Documentation:** [https://antigravity.google/docs/getting-started](https://antigravity.google/docs/getting-started) — Aula 02.
+   - **Google Antigravity Documentation:** [https://antigravity.google/docs/getting-started](https://antigravity.google/docs/getting-started) e [https://antigravity.google/docs/cli/reference](https://antigravity.google/docs/cli/reference) — Aula 02.
    - **Anthropic Claude Code Documentation:** [https://code.claude.com/docs/en/overview](https://code.claude.com/docs/en/overview) — Aula 02.
    - **OpenAI Codex / ChatGPT Cloud Documentation:** [https://learn.chatgpt.com/docs/cloud](https://learn.chatgpt.com/docs/cloud) — Aula 02.
 

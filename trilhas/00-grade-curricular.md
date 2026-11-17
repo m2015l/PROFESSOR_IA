@@ -24,7 +24,7 @@
 ### 02. Engenharia de Software Assistida por IA (`02-engenharia-de-software-assistida-por-ia/`) — **[ATIVA]**
 - `00-indice.md` — Objetivos, pré-requisitos e sequência da trilha.
 - `01-do-vibe-coding-a-engenharia-orientada-a-especificacao.md` — Geração exploratória vs engenharia orientada a especificação, o problema dos 70%, decomposição modular e regras de contexto (`GEMINI.md`, `CLAUDE.md`, `AGENTS.md`).
-- `02-fluxo-operacional-com-agentes-de-codigo-cli-e-ide.md` — Ciclo *Plan-Execute-Verify-Report*, operação com Google Antigravity, Claude Code e OpenAI Codex, higiene de janela de contexto e isolamento em sandboxes.
+- `02-fluxo-operacional-com-agentes-de-codigo-cli-e-ide.md` — Ciclo *Plan-Execute-Verify-Report*, higiene de janela de contexto, isolamento em sandboxes e aprofundamento interativo à escolha do aluno em Google Antigravity, Claude Code e/ou OpenAI Codex (comandos, artefatos, integrações, subagentes e segurança).
 - `03-revisao-critica-testes-automatizados-e-seguranca-em-codigo-gerado.md` — Auditoria de vulnerabilidades (SQL Injection, segredos, autorização), refatoração e suítes de testes determinísticos com `pytest`.
 - `referencias.md` — Bibliografia consolidada e documentações oficiais de agentes de código.
 

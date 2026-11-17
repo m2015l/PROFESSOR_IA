@@ -1,6 +1,7 @@
 .env
 .aluno.env
 .aluno.cache.json
+.aula.session.json
 progresso.local.md
 progresso.pending.json
 __pycache__/
