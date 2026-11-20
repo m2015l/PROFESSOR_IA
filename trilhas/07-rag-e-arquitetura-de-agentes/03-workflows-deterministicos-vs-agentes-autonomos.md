@@ -49,12 +49,14 @@ Portanto, o projeto deve seguir a **Hierarquia de Arquiteturas Cognitivas**, sel
 O código abaixo implementa o padrão **Evaluator-Optimizer (Reflection)** acoplado a uma validação determinística (*gate*) para síntese de consultas SQL seguras, garantindo que apenas comandos de leitura aprovados sejam retornados.
 
 ```python
+import os
 from typing import Literal
 from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 
-llm = ChatOpenAI(model="gpt-4o", temperature=0)
+# Parametrize o identificador do modelo via variável de ambiente para evitar dependência de modelos depreciados
+llm = ChatOpenAI(model=os.environ["OPENAI_MODEL"], temperature=0)
 
 class CandidatoSQL(BaseModel):
     consulta_sql: str = Field(description="Consulta SQL ANSI de leitura (SELECT)")

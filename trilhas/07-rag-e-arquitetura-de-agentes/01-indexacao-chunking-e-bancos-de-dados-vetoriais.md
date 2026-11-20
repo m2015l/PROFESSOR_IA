@@ -67,7 +67,7 @@ record_manager.create_schema()
 # Extração e particionamento calibrado por tokens
 raw_docs = PyPDFLoader("dados/manual_operacional.pdf").load()
 splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-    model_name="gpt-4o",
+    encoding_name="o200k_base",
     chunk_size=500,
     chunk_overlap=75,
 )

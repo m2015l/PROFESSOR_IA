@@ -42,6 +42,7 @@ Sistemas complexos dividem responsabilidades em **Subgrafos** (com esquema compa
 O código a seguir implementa um agente em **LangGraph** com estado tipado, `MemorySaver`, poda segura de histórico (`trim_messages`) e interrupção *Human-in-the-Loop* (`interrupt_before=["tools"]`) para auditoria antes da execução de ferramentas.
 
 ```python
+import os
 from typing import Annotated, TypedDict
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import BaseMessage, HumanMessage, trim_messages
@@ -62,7 +63,9 @@ def transferir_pix(conta_origem_id: str, chave_destino: str, valor_reais: float)
     return f"Transferência de R$ {valor_reais:.2f} de {conta_origem_id} para {chave_destino} efetivada."
 
 ferramentas = [consultar_saldo, transferir_pix]
-llm = ChatOpenAI(model="gpt-4o", temperature=0).bind_tools(ferramentas)
+# Parametrize o identificador do modelo via variável de ambiente para evitar dependência de modelos depreciados
+llm_base = ChatOpenAI(model=os.environ["OPENAI_MODEL"], temperature=0)
+llm = llm_base.bind_tools(ferramentas)
 
 class EstadoAgente(TypedDict):
     messages: Annotated[list[BaseMessage], add_messages]
@@ -72,7 +75,7 @@ def no_modelo(state: EstadoAgente) -> dict:
         state["messages"],
         max_tokens=2000,
         strategy="last",
-        token_counter=ChatOpenAI(model="gpt-4o"),
+        token_counter=llm_base,
         include_system=True,
         allow_partial=False,
         start_on="human",

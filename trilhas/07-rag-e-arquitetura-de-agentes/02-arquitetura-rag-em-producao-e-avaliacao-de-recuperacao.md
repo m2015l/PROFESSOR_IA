@@ -53,13 +53,15 @@ Para equilibrar latência e precisão, a recuperação em produção opera em do
 O código a seguir implementa o padrão **RAG-Fusion** com geração fundamentada em **LangChain (LCEL)**, combinando reformulação estruturada de consultas, fusão via **RRF ($k=60$)** e restrição explícita de citação de fontes.
 
 ```python
+import os
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnableLambda
 from pydantic import BaseModel, Field
 
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+# Parametrize o identificador do modelo via variável de ambiente para evitar dependência de modelos depreciados
+llm = ChatOpenAI(model=os.environ["OPENAI_MODEL"], temperature=0)
 
 class VariacoesConsulta(BaseModel):
     consultas: list[str] = Field(description="4 consultas de busca técnica reformuladas")
