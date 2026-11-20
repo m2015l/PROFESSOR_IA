@@ -44,6 +44,7 @@ Envie uma mensagem inicial no chat (por exemplo: *"Quero começar as aulas"*):
 ## Regras Importantes
 
 - **Abra sempre um chat novo** para cada aula iniciada.
+- **Não use autocomplete / sugestões prévias (`Tab`) na caixa de resposta:** o repositório já desativa esse recurso automaticamente no Claude Code (`.claude/settings.json`) e no Gemini CLI (`.gemini/settings.json`). Caso a sua interface ainda exiba respostas prévias em cinza na caixa de texto (ex.: apps desktop ou Codex), desative manualmente (`/config` → **Prompt suggestions** no Claude; `/settings` → **Prompt completion** no Gemini) e nunca aceite respostas automáticas com `Tab`.
 - **Não altere** nenhum arquivo dentro da pasta `trilhas/`.
 - **Não execute `git push`** neste repositório — o envio do seu progresso é feito exclusivamente via `python scripts/sync_progresso.py`.
 - **Não compartilhe** seu `ALUNO_TOKEN` nem o arquivo `.aluno.env`.
